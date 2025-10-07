@@ -1,0 +1,277 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-3">РќРѕРІР°СЏ РѕРїРµСЂР°С†РёСЏ (Р‘Р°РЅРє)</h4>
+  <form method="post">
+    <!-- CSRF С‚РѕРєРµРЅ РѕР±СЏР·Р°С‚РµР»РµРЅ -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё</label>
+        <input type="date" name="date_op" class="form-control" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Р‘Р°РЅРє</label>
+        <select name="bank_name" class="form-select" required>
+          {% for b in banks %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">в„– СЃС‡С‘С‚Р° (20 Р·РЅР°РєРѕРІ)</label>
+        <select name="account_number" class="form-select" required>
+          {% for a in accounts %}<option value="{{ a.number }}">{{ a.number }}</option>{% endfor %}
+        </select>
+        <div class="form-text">РЎС‡РµС‚Р° РґРѕР±Р°РІР»СЏСЋС‚СЃСЏ РІ СЃРїСЂР°РІРѕС‡РЅРёРєРµ В«РЎС‡РµС‚Р° Р±Р°РЅРєР°В»</div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Р Р°Р·РґРµР»</label>
+        <select name="section" class="form-select" required>
+          <option>РџСЂРёС…РѕРґ</option>
+          <option>Р Р°СЃС…РѕРґ</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">РљРѕРґ РєР»РёРµРЅС‚Р°</label>
+        <select id="client_code" name="client_code" class="form-select" required>
+          {% for c in codes %}<option value="{{ c.code }}">{{ c.code }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">РќР°РёРјРµРЅРѕРІР°РЅРёРµ РєР»РёРµРЅС‚Р°</label>
+        <input id="client_name" name="client_name" class="form-control" readonly>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">РћСЃРЅРѕРІР°РЅРёРµ</label>
+        <input name="basis" class="form-control" maxlength="255" placeholder="РЅР°РїСЂРёРјРµСЂ, РѕРїР»Р°С‚Р° РїРѕ СЃС‡С‘С‚Сѓ в„–вЂ¦">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Р’Р°Р»СЋС‚Р°</label>
+        <select name="currency" class="form-select" required>
+          {% for cur in currencies %}<option>{{ cur }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">РљСѓСЂСЃ</label>
+        <input id="rate" name="rate" type="number" step="0.0001" class="form-control" value="1.0000" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">РќРѕРјРёРЅР°Р»</label>
+        <input id="nominal" name="nominal" type="number" step="0.0001" class="form-control" value="0.0000" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Р­РєРІРёРІР°Р»РµРЅС‚</label>
+        <input id="equivalent" name="equivalent" type="number" step="0.0001" class="form-control" value="0.0000" readonly>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">РџСЂРёРјРµС‡Р°РЅРёРµ</label>
+        <textarea name="note" class="form-control" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button class="btn btn-primary">РЎРѕС…СЂР°РЅРёС‚СЊ</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('banks.list_ops') }}">РћС‚РјРµРЅР°</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  function recalc() {
+    const r = parseFloat(document.getElementById('rate').value || '0');
+    const n = parseFloat(document.getElementById('nominal').value || '0');
+    document.getElementById('equivalent').value = (r*n).toFixed(4);
+  }
+  document.getElementById('rate').addEventListener('input', recalc);
+  document.getElementById('nominal').addEventListener('input', recalc);
+  recalc();
+
+  const codeSel = document.getElementById('client_code');
+  const nameInp = document.getElementById('client_name');
+  async function fillName() {
+    const resp = await fetch(`/banks/api/ref-code/${codeSel.value}`);
+    const data = await resp.json();
+    nameInp.value = data.name || "";
+  }
+  codeSel.addEventListener('change', fillName);
+  fillName();
+</script>
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}Р’РЅСѓС‚СЂРµРЅРЅРёР№ С‚СѓСЂРёР·Рј вЂ” РќРѕРІС‹Р№ Р·Р°РєР°Р·{% endblock %}
+
+{% block content %}
+<div class="container-xxl my-4">
+  <h3 class="mb-3">Р’РЅСѓС‚СЂРµРЅРЅРёР№ С‚СѓСЂРёР·Рј вЂ” РЅРѕРІС‹Р№ Р·Р°РєР°Р·</h3>
+
+  {# Flash-СЃРѕРѕР±С‰РµРЅРёСЏ #}
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <div class="mb-3">
+        {% for cat, msg in msgs %}
+          <div class="alert alert-{{ 'danger' if cat=='error' else cat }} mb-2">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" novalidate>
+    {{ form.csrf_token }}
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        {{ form.order_date.label(class_="form-label") }}
+        {{ form.order_date(class_="form-control", type="date") }}
+        {% if form.order_date.errors %}
+          <div class="text-danger small mt-1">{{ form.order_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.kind.label(class_="form-label") }}
+        {{ form.kind(class_="form-select") }}
+        {% if form.kind.errors %}
+          <div class="text-danger small mt-1">{{ form.kind.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.fio.label(class_="form-label") }}
+        {{ form.fio(class_="form-control", placeholder="Р¤РРћ РєР»РёРµРЅС‚Р°") }}
+        {% if form.fio.errors %}
+          <div class="text-danger small mt-1">{{ form.fio.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.start_date.label(class_="form-label") }}
+        {{ form.start_date(class_="form-control", type="date") }}
+        {% if form.start_date.errors %}
+          <div class="text-danger small mt-1">{{ form.start_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.end_date.label(class_="form-label") }}
+        {{ form.end_date(class_="form-control", type="date") }}
+        {% if form.end_date.errors %}
+          <div class="text-danger small mt-1">{{ form.end_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.direction.label(class_="form-label") }}
+        {{ form.direction(class_="form-control", placeholder="РќР°РїСЂР°РІР»РµРЅРёРµ") }}
+        {% if form.direction.errors %}
+          <div class="text-danger small mt-1">{{ form.direction.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.supplier_code.label(class_="form-label") }}
+        {{ form.supplier_code(class_="form-control", placeholder="РєРѕРґ РїРѕСЃС‚Р°РІС‰РёРєР°", inputmode="numeric", pattern="\\d{5}", maxlength="10", autocomplete="off") }}
+        <div class="form-text">РљРѕРґ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° (С‚РёРї = РџРѕСЃС‚Р°РІС‰РёРє). Р¤РѕСЂРјР°С‚: 5 С†РёС„СЂ.</div>
+        {% if form.supplier_code.errors %}
+          <div class="text-danger small mt-1">{{ form.supplier_code.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.client_code.label(class_="form-label") }}
+        {{ form.client_code(class_="form-control", placeholder="РєРѕРґ РєР»РёРµРЅС‚Р°", inputmode="numeric", pattern="\\d{5}", maxlength="10", autocomplete="off") }}
+        <div class="form-text">РљРѕРґ РёР· СЃРїСЂР°РІРѕС‡РЅРёРєР° (С‚РёРї = РљР»РёРµРЅС‚). Р¤РѕСЂРјР°С‚: 5 С†РёС„СЂ.</div>
+        {% if form.client_code.errors %}
+          <div class="text-danger small mt-1">{{ form.client_code.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.cost.label(class_="form-label") }}
+        {{ form.cost(class_="form-control", step="0.01", inputmode="decimal", placeholder="0.00") }}
+        {% if form.cost.errors %}
+          <div class="text-danger small mt-1">{{ form.cost.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.price.label(class_="form-label") }}
+        {{ form.price(class_="form-control", step="0.01", inputmode="decimal", placeholder="0.00") }}
+        {% if form.price.errors %}
+          <div class="text-danger small mt-1">{{ form.price.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.net.label(class_="form-label") }}
+        {{ form.net(class_="form-control", readonly=True) }}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.margin.label(class_="form-label") }}
+        {{ form.margin(class_="form-control", readonly=True) }}
+      </div>
+
+      <div class="col-12">
+        {{ form.note.label(class_="form-label") }}
+        {{ form.note(class_="form-control", rows=3) }}
+        {% if form.note.errors %}
+          <div class="text-danger small mt-1">{{ form.note.errors[0] }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      {% if form.submit %}
+        {{ form.submit(class_="btn btn-primary") }}
+      {% else %}
+        <button type="submit" class="btn btn-primary">РЎРѕС…СЂР°РЅРёС‚СЊ</button>
+      {% endif %}
+      <a class="btn btn-outline-secondary" href="{{ url_for('internal.tours_list') }}">РћС‚РјРµРЅР°</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const sel = (q) => document.querySelector(q);
+
+  function toNum(v) {
+    if (v == null) return 0;
+    return parseFloat(String(v).replace(/\s+/g,'').replace(',', '.')) || 0;
+  }
+  function setVal(input, val, digits=2, suffix='') {
+    if (!input) return;
+    const n = (Math.round(val * Math.pow(10, digits)) / Math.pow(10, digits)).toFixed(digits);
+    input.value = suffix ? (n + suffix) : n;
+  }
+
+  const cost  = sel('[name="cost"]');
+  const price = sel('[name="price"]');
+  const net   = sel('[name="net"]');
+  const mrg   = sel('[name="margin"]');
+
+  function recalc() {
+    const c = toNum(cost && cost.value);
+    const p = toNum(price && price.value);
+    const n = p - c;
+    const m = p > 0 ? (n * 100 / p) : 0;
+    setVal(net, n, 2);
+    setVal(mrg, m, 1);
+  }
+
+  if (cost)  cost.addEventListener('input', recalc);
+  if (price) price.addEventListener('input', recalc);
+  recalc();
+})();
+</script>
+{% endblock %}
+

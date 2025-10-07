@@ -1,0 +1,61 @@
+﻿<form method="post" novalidate>
+  {{ form.csrf_token }}
+  <div class="row g-3">
+    <div class="col-12 col-md-4">
+      <label class="form-label">{{ form.code.label }}</label>
+      {{ form.code(class="form-control") }}
+      {% for e in form.code.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="col-12 col-md-8">
+      <label class="form-label">{{ form.name.label }}</label>
+      {{ form.name(class="form-control") }}
+      {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label">{{ form.type_id.label }}</label>
+      <div class="input-group">
+        {{ form.type_id(class="form-select", id="type_id") }}
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#quickTypeModal">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+      {% for e in form.type_id.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label">{{ form.status.label }}</label>
+      {{ form.status(class="form-select") }}
+      {% for e in form.status.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="col-12">
+      {{ form.submit(class="btn btn-primary") }}
+      <a href="{{ url_for('refs.codes_list') }}" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+  </div>
+</form>
+
+<div class="modal fade" id="quickTypeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="quickTypeForm" method="post" action="{{ url_for('refs.code_types_quick_add') }}">
+      <div class="modal-header">
+        <h5 class="modal-title">Новый тип кода</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+          <label class="form-label">Наименование</label>
+          <input name="name" class="form-control" maxlength="64" required>
+          <div class="form-text">Например: Вид услуги, Категория клиента.</div>
+        </div>
+        <div class="text-danger small d-none" id="qtErr"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary">Добавить</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/refs.js') }}"></script>
+
+

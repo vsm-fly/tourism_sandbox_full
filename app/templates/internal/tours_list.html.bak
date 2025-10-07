@@ -1,0 +1,41 @@
+﻿{% extends "base.html" %}
+{% block title %}Внутренний туризм  список{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Внутренний туризм</h3>
+    <a class="btn btn-primary" href="{{ url_for('internal.tour_create') }}"><i class="bi bi-plus-lg"></i> Новый заказ</a>
+  </div>
+  {% if items %}
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead><tr>
+        <th>#</th><th>Дата</th><th>Вид</th><th>ФИО</th><th>Период</th><th>Направление</th>
+        <th>Поставщик</th><th>Клиент</th><th class="text-end">Себестоим.</th><th class="text-end">Цена</th>
+        <th class="text-end">Нетто</th><th class="text-end">Маржа, %</th>
+      </tr></thead>
+      <tbody>
+      {% for x in items %}
+        <tr>
+          <td>{{ x.id }}</td>
+          <td>{{ x.order_date.strftime('%d.%m.%Y') }}</td>
+          <td>{{ x.kind }}</td>
+          <td>{{ x.fio }}</td>
+          <td>{{ x.start_date.strftime('%d.%m') }}{{ x.end_date.strftime('%d.%m.%Y') }}</td>
+          <td>{{ x.direction }}</td>
+          <td>{{ x.supplier.name if x.supplier else '' }}</td>
+          <td>{{ x.client.name if x.client else '' }}</td>
+          <td class="text-end">{{ '%.2f'|format(x.cost or 0) }}</td>
+          <td class="text-end">{{ '%.2f'|format(x.price or 0) }}</td>
+          <td class="text-end">{{ '%.2f'|format(x.net or 0) }}</td>
+          <td class="text-end">{{ '%.1f'|format(x.margin or 0) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="alert alert-info">Пока нет записей. Нажми Новый заказ.</div>
+  {% endif %}
+</div>
+{% endblock %}

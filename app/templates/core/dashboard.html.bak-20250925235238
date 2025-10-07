@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Панель управления{% endblock %}
+
+{% block content %}
+<div class="dash-hero py-5">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <!-- ЛОГО БЕЗ РАМКИ/ФОНА -->
+      <span class="dash-logo">
+        <img
+          src="{{ url_for('static', filename='img/logo.png') }}?v=1"
+          alt="Логотип Fly.TJ"
+          class="dash-logo-img"
+          width="84" height="84">
+      </span>
+
+      <h1 class="h3 mt-3 mb-2 fw-semibold">Панель управления</h1>
+      <span class="badge bg-success rounded-pill px-3 py-2">
+        {{ 'Администратор' if current_user.is_admin else 'Пользователь' }}
+      </span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+      <!-- Касса -->
+      <div class="col">
+        <a class="dash-card dash-card--icon d-block text-decoration-none is-cash"
+           href="#" aria-label="Перейти в модуль Касса" rel="noopener">
+          <div class="dash-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></div>
+          <div class="dash-meta">
+            <div class="dash-title">Касса</div>
+            <i class="bi bi-chevron-right dash-arrow" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
+      <!-- Банк -->
+      <div class="col">
+        <a class="dash-card dash-card--icon d-block text-decoration-none is-bank"
+           href="#" aria-label="Перейти в модуль Банк" rel="noopener">
+          <div class="dash-icon"><i class="bi bi-bank" aria-hidden="true"></i></div>
+          <div class="dash-meta">
+            <div class="dash-title">Банк</div>
+            <i class="bi bi-chevron-right dash-arrow" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
+      <!-- Авиабилеты -->
+      <div class="col">
+        <a class="dash-card dash-card--icon d-block text-decoration-none is-air"
+           href="#" aria-label="Перейти в модуль Авиабилеты" rel="noopener">
+          <div class="dash-icon"><i class="bi bi-airplane" aria-hidden="true"></i></div>
+          <div class="dash-meta">
+            <div class="dash-title">Авиабилеты</div>
+            <i class="bi bi-chevron-right dash-arrow" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
+      <!-- Внутренний туризм -->
+      <div class="col">
+        <a class="dash-card dash-card--icon d-block text-decoration-none is-internal"
+           href="{{ url_for('internal.tours_list') }}" aria-label="Перейти в модуль Внутренний туризм">
+          <div class="dash-icon"><i class="bi bi-house-heart" aria-hidden="true"></i></div>
+          <div class="dash-meta">
+            <div class="dash-title">Внутренний туризм</div>
+            <i class="bi bi-chevron-right dash-arrow" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
+      <!-- Внешний туризм -->
+      <div class="col">
+        <a class="dash-card dash-card--icon d-block text-decoration-none is-external"
+           href="#" aria-label="Перейти в модуль Внешний туризм" rel="noopener">
+          <div class="dash-icon"><i class="bi bi-globe2" aria-hidden="true"></i></div>
+          <div class="dash-meta">
+            <div class="dash-title">Внешний туризм</div>
+            <i class="bi bi-chevron-right dash-arrow" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
+    </div>
+
+    <div class="text-center text-muted small mt-5">
+      v1.26 от 24.09.2025 02:01 • VSM
+    </div>
+  </div>
+</div>
+{% endblock %}

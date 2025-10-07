@@ -1,0 +1,12 @@
+<div class="container py-4">
+  <div class="alert alert-danger" role="alert">
+    <h5 class="alert-heading mb-2">Запрос отклонён (CSRF)</h5>
+    <p class="mb-2">{{ reason or "Неверный или отсутствует CSRF токен." }}</p>
+    <hr>
+    <p class="mb-0">
+      Попробуйте обновить страницу и повторить действие. Если проблема сохраняется  выйдите и войдите снова.
+    </p>
+  </div>
+  <a class="btn btn-secondary" href="{{ request.referrer or url_for('refs.codes_list') }}">Назад</a>
+</div>
+{% endblock %}

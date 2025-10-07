@@ -1,0 +1,113 @@
+﻿{% extends "base.html" %}
+{% block title %}Импорт кодов из Excel{% endblock %}
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="m-0">Импорт кодов из Excel</h3>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('refs.codes_import_template') }}">
+        <i class="bi bi-file-earmark-excel"></i> Скачать шаблон
+      </a>
+      <a class="btn btn-outline-dark" href="{{ url_for('refs.codes_list') }}">Назад к списку</a>
+    </div>
+  </div>
+
+  <!-- Форма загрузки -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Файл Excel (.xlsx)</label>
+            <input class="form-control" type="file" name="file" accept=".xlsx" required>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="ct" name="create_types" value="1" {% if create_types %}checked{% endif %}>
+              <label class="form-check-label" for="ct">Создавать новые типы при импорте</label>
+            </div>
+          </div>
+          <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-primary">Предпросмотр</button>
+          </div>
+        </div>
+        <div class="form-text mt-2">Ожидаемые столбцы: <code>Код</code>, <code>Наименование</code>, <code>Тип</code>, <code>Статус</code>.</div>
+      </form>
+    </div>
+  </div>
+
+  {% if preview %}
+  <!-- Результаты превью -->
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-3 mb-3">
+        <div><span class="badge text-bg-secondary">Всего: {{ preview.total }}</span></div>
+        <div><span class="badge text-bg-danger">Ошибки: {{ preview.errors }}</span></div>
+        <div><span class="badge text-bg-warning">Дубликаты в файле: {{ preview.duplicates_in_file }}</span></div>
+        <div><span class="badge text-bg-warning">Дубликаты: {{ preview.duplicates }}</span></div>
+        <div>
+          {% if preview.new_types and not preview.create_types %}
+            <span class="badge text-bg-warning">Новые типы: {{ preview.new_types|length }} (создание выключено)</span>
+          {% elif preview.new_types %}
+            <span class="badge text-bg-success">Новые типы: {{ preview.new_types|length }} (будут созданы)</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Новых типов нет</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Код</th>
+              <th>Наименование</th>
+              <th>Тип</th>
+              <th>Статус</th>
+              <th>Проверка</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in preview.rows %}
+            <tr class="{% if not r.ok %}table-warning{% endif %}">
+              <td>{{ loop.index }}</td>
+              <td>{{ r.code }}</td>
+              <td>{{ r.name }}</td>
+              <td>{{ r.type }}</td>
+              <td>{{ "Активен" if r.status == "active" else ("Не активен" if r.status == "inactive" else r.status) }}</td>
+              <td>
+                {% if r.ok %}
+                  <span class="badge text-bg-success">OK</span>
+                {% else %}
+                  {% for p in r.problems %}
+                    <span class="badge text-bg-danger">{{ p }}</span>
+                  {% endfor %}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if preview.total > preview.rows|length %}
+          <div class="text-muted small">Показаны первые {{ preview.rows|length }} строк из {{ preview.total }}.</div>
+        {% endif %}
+      </div>
+
+      <form method="post" action="{{ url_for('refs.codes_import_commit') }}" class="mt-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="create_types" value="{{ 1 if preview.create_types else 0 }}">
+        <button class="btn btn-success" {% if preview.errors %}disabled{% endif %}>
+          <i class="bi bi-check2-circle"></i> Импортировать
+        </button>
+        {% if preview.errors %}
+          <div class="form-text text-danger">Есть ошибки  импорт заблокирован. Исправьте файл или включите Создавать новые типы, если причина только в них.</div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

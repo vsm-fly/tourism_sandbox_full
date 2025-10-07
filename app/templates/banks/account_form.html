@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-3">Добавить счёт</h4>
+
+  <form method="post" action="{{ url_for('banks.accounts_new') }}" class="row g-3" autocomplete="off">
+    <!-- CSRF -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="col-md-4">
+      <label for="bank_name" class="form-label">Банк</label>
+      <input id="bank_name"
+             name="bank_name"
+             class="form-control"
+             list="bank_list"
+             required
+             value="{{ request.form.get('bank_name','') }}">
+      <datalist id="bank_list">
+        {% for b in ["Алиф","Васл","Ориёнбанк","Халык","IBT","Хумо","Спитамен","Эсхата","Мегафон лайф","DC"] %}
+          <option value="{{ b }}">
+        {% endfor %}
+      </datalist>
+    </div>
+
+    <div class="col-md-4">
+      <label for="acc_number" class="form-label">№ счёта (20 цифр)</label>
+      <input id="acc_number"
+             name="number"
+             class="form-control"
+             inputmode="numeric"
+             pattern="\d{20}"
+             maxlength="20"
+             minlength="20"
+             required
+             value="{{ request.form.get('number','') }}">
+      <div class="form-text">Ровно 20 цифр</div>
+    </div>
+
+    <div class="col-md-2">
+      <label for="currency" class="form-label">Валюта</label>
+      <select id="currency" name="currency" class="form-select" required>
+        {% for cur in currencies %}
+          <option value="{{ cur }}" {% if request.form.get('currency', currencies[0]) == cur %}selected{% endif %}>{{ cur }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('banks.accounts_list') }}">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

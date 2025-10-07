@@ -1,0 +1,140 @@
+﻿{% extends "base.html" %}
+{% block title %}Новая операция (Банк){% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Новая операция (Банк)</h4>
+    <a class="btn btn-outline-secondary" href="{{ url_for('banks.list_ops') }}">К списку операций</a>
+  </div>
+
+  <form method="post" autocomplete="off" class="row g-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="col-md-3">
+      <label class="form-label">Дата операции</label>
+      <input type="date" name="date_op" class="form-control" required>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Банк</label>
+      <select name="bank_name" id="bank_name" class="form-select" required>
+        {% for b in banks %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">№ счёта</label>
+      <select name="account_number" id="account_number" class="form-select" required>
+        {% for a in accounts %}
+          <option value="{{ a.number }}" data-bank="{{ a.bank_name }}" data-currency="{{ a.currency }}">
+            {{ a.number }} ({{ a.bank_name }} · {{ a.currency }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Секция</label>
+      <select name="section" class="form-select" required>
+        <option value="Приход">Приход</option>
+        <option value="Расход">Расход</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Код контрагента</label>
+      <input type="text" name="client_code" id="client_code" class="form-control"
+             placeholder="напр. SUP123" required pattern="^\S+$">
+    </div>
+
+    {# скрытое имя контрагента — не мешает на форме, но уходит на сервер #}
+    <input type="hidden" name="client_name" id="client_name" value="">
+
+    <div class="col-md-9">
+      <label class="form-label">Основание</label>
+      <input type="text" name="basis" class="form-control" placeholder="назначение/основание платежа">
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Валюта</label>
+      <select name="currency" id="currency" class="form-select" required>
+        {% for c in currencies %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Курс</label>
+      <input type="number" name="rate" id="rate" class="form-control"
+             value="1" step="0.0001" min="0" inputmode="decimal" required>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Номинал</label>
+      <input type="number" name="nominal" id="nominal" class="form-control"
+             value="0" step="0.0001" min="0" inputmode="decimal" required>
+    </div>
+
+    {# поле «Эквивалент» убрано — считается на сервере #}
+
+    <div class="col-12">
+      <label class="form-label">Примечание</label>
+      <textarea name="note" class="form-control" rows="2"></textarea>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit">Сохранить</button>
+      <a class="btn btn-secondary ms-2" href="{{ url_for('banks.list_ops') }}">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Из выбранного счёта подставляем банк и валюту
+  (function () {
+    const accSel  = document.getElementById('account_number');
+    const bankSel = document.getElementById('bank_name');
+    const curSel  = document.getElementById('currency');
+
+    function syncFromAccount() {
+      const opt = accSel && accSel.options[accSel.selectedIndex];
+      if (!opt) return;
+      const bank = opt.getAttribute('data-bank') || '';
+      const cur  = opt.getAttribute('data-currency') || '';
+      if (bankSel) [...bankSel.options].forEach(o => o.selected = (o.value === bank));
+      if (curSel)  [...curSel.options].forEach(o => o.selected = (o.value === cur));
+    }
+
+    if (accSel) {
+      accSel.addEventListener('change', syncFromAccount);
+      syncFromAccount(); // первичная синхронизация
+    }
+  })();
+
+  // Тихо подтягиваем имя контрагента по введённому коду
+  (function () {
+    const codeEl = document.getElementById('client_code');
+    const nameEl = document.getElementById('client_name');
+    if (!codeEl || !nameEl) return;
+
+    let t = null;
+    async function fillName() {
+      const code = (codeEl.value || '').trim();
+      if (!code) { nameEl.value = ''; return; }
+      try {
+        const url = "{{ url_for('banks.ajax_ref_code', code='__CODE__') }}"
+                      .replace('__CODE__', encodeURIComponent(code));
+        const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (data && data.ok) nameEl.value = data.name || '';
+      } catch (_) {}
+    }
+
+    codeEl.addEventListener('input', () => { clearTimeout(t); t = setTimeout(fillName, 250); });
+    codeEl.addEventListener('blur', fillName);
+  })();
+</script>
+{% endblock %}

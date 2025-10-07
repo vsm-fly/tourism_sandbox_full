@@ -1,0 +1,230 @@
+﻿/* ==========================================================================
+   THEME.CSS — минималистичный корпоративный UI для Bootstrap 5.3+
+   Под бренд FLY.TJ (Tourism Sandbox)
+   ========================================================================== */
+
+/* ---------- CSS Variables ---------- */
+:root {
+  --radius: 16px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 14px rgba(16,24,40,.06);
+  --shadow-md: 0 10px 30px rgba(16,24,40,.08);
+  --hairline: 1px solid rgba(16,24,40,.10);
+
+  /* Цвета */
+  --brand-primary: #0d6efd;
+  --brand-hover: #0a58ca;
+  --bg-soft: #f9fbff;
+  --bg-card: #ffffff;
+  --ink-900: #0f172a;
+  --ink-700: #334155;
+  --ink-500: #64748b;
+  --line-200: rgba(16,24,40,.10);
+  --line-300: rgba(16,24,40,.15);
+}
+
+/* ---------- Base reset & typography ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ink-900);
+  background: var(--bg-card);
+}
+
+a { text-decoration: none; transition: color .15s ease-in-out; }
+a:hover { text-decoration: underline; }
+
+.container-xxl { max-width: 1320px; }
+
+/* ---------- Logo animation ---------- */
+.logo-animated {
+  transition: transform .4s ease, filter .4s ease;
+}
+.logo-animated:hover {
+  transform: scale(1.06) rotate(-2deg);
+  filter: drop-shadow(0 4px 10px rgba(13,110,253,.25));
+}
+
+/* ---------- Cards / Panels ---------- */
+.card {
+  border-radius: var(--radius);
+  border: var(--hairline);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.card.hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(16,24,40,.10);
+}
+
+/* ---------- Buttons ---------- */
+.btn { border-radius: var(--radius-sm); transition: all .15s ease-in-out; }
+.btn-outline-secondary { border-color: var(--line-200); }
+
+.btn-primary-soft {
+  background: rgba(13,110,253,.10);
+  color: var(--brand-primary);
+  border: 1px solid rgba(13,110,253,.20);
+}
+.btn-primary-soft:hover {
+  background: rgba(13,110,253,.16);
+  color: var(--brand-hover);
+  border-color: rgba(13,110,253,.30);
+}
+
+/* ---------- Forms ---------- */
+.form-control, .form-select {
+  border-radius: var(--radius-sm);
+  border-color: var(--line-200);
+  background-clip: padding-box;
+}
+.form-control:focus, .form-select:focus {
+  border-color: rgba(13,110,253,.35);
+  box-shadow: 0 0 0 .25rem rgba(13,110,253,.15);
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  border-bottom: var(--hairline);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.navbar-brand { letter-spacing: .3px; font-weight: 600; }
+
+/* ---------- Dashboard Hero ---------- */
+.dash-hero {
+  background:
+    radial-gradient(1400px 700px at 50% -260px, rgba(13,110,253,.10), transparent 60%),
+    linear-gradient(180deg, var(--bg-soft) 0%, #ffffff 60%);
+  border-radius: 0 0 48px 48px;
+}
+.dash-logo-img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: var(--shadow-sm);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.dash-logo-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(13,110,253,.2);
+}
+
+/* ---------- Dashboard Cards ---------- */
+.dash-card {
+  display: block;
+  padding: 1rem;
+  border-radius: 18px;
+  border: var(--hairline);
+  background: #fff;
+  box-shadow: var(--shadow-md);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.dash-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(16,24,40,.10);
+}
+
+.dash-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: .35rem;
+}
+
+.dash-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5ff;
+  border: 1px solid rgba(13,110,253,.12);
+  box-shadow: var(--shadow-sm);
+  font-size: 1.25rem;
+  color: var(--brand-primary);
+}
+
+.dash-card-pill {
+  margin-left: auto;
+  font-size: .75rem;
+  padding: .2rem .55rem;
+  background: rgba(13,110,253,.08);
+  color: var(--brand-primary);
+  border: 1px solid rgba(13,110,253,.16);
+  border-radius: 999px;
+}
+
+.dash-card-title { font-weight: 600; }
+.dash-card-sub { color: var(--ink-500); line-height: 1.35; }
+
+/* ---------- Disabled cards ---------- */
+a.dash-card.disabled {
+  pointer-events: none;
+  opacity: .6;
+  filter: grayscale(1);
+}
+
+/* ---------- Table UX ---------- */
+.table-wrap {
+  overflow: auto;
+  border-radius: 14px;
+  border: var(--hairline);
+  background: #fff;
+  box-shadow: var(--shadow-md);
+}
+.table thead th {
+  background: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-weight: 600;
+}
+.table tbody tr:hover {
+  background: rgba(13,110,253,.06);
+}
+
+/* ---------- Utilities ---------- */
+.shadow-soft { box-shadow: var(--shadow-sm) !important; }
+.text-dim { color: var(--ink-500) !important; }
+.bg-soft { background: var(--bg-soft) !important; }
+.rounded-xl { border-radius: 22px !important; }
+
+/* ---------- Animation helpers ---------- */
+@keyframes logoPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.logo-animated {
+  animation: logoPulse 5s ease-in-out infinite;
+}
+
+/* ---------- Dark theme ---------- */
+body.dark-theme {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+body.dark-theme .card,
+body.dark-theme .dash-card,
+body.dark-theme .table-wrap {
+  background: #1e293b;
+  border-color: rgba(255,255,255,.08);
+}
+body.dark-theme .dash-card:hover {
+  box-shadow: 0 10px 24px rgba(0,0,0,.5);
+}
+body.dark-theme .dash-logo-img:hover {
+  box-shadow: 0 0 15px rgba(59,130,246,.3);
+}

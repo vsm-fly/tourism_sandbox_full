@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Панель управления{% endblock %}
+
+{% block content %}
+<div class="dash-hero py-5">
+  <div class="container-xxl">
+
+    <!-- Верхняя часть: логотип + приветствие + бейджи -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{{ url_for('static', filename='img/logo.png') }}"
+             alt="Логотип FLY.TJ"
+             class="dash-logo-img logo-animated"
+             loading="lazy">
+        <div>
+          <h1 class="h4 mb-1 fw-semibold">Панель управления</h1>
+          <div class="text-secondary small">
+            Добро пожаловать, {{ current_user.username or 'Пользователь' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">
+          <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+          {{ 'Администратор' if current_user.is_admin|default(false) else 'Пользователь' }}
+        </span>
+        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis px-3 py-2">
+          v{{ config.get('APP_VERSION', '1.0') }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Модули -->
+    <div class="row g-4">
+      <!-- Касса -->
+      <div class="col-12 col-md-6 col-xl-4">
+        <a class="dash-card" href="{{ url_for('banks.list_ops') }}">
+          <div class="dash-card-top">
+            <span class="dash-card-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></span>
+            <div class="flex-grow-1">
+              <div class="dash-card-title">Касса</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Банк -->
+      <div class="col-12 col-md-6 col-xl-4">
+        <a class="dash-card" href="{{ url_for('banks.list_ops') }}">
+          <div class="dash-card-top">
+            <span class="dash-card-icon"><i class="bi bi-bank" aria-hidden="true"></i></span>
+            <div class="flex-grow-1">
+              <div class="dash-card-title">Банк</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Авиабилеты -->
+      <div class="col-12 col-md-6 col-xl-4">
+        <a class="dash-card disabled" href="#" tabindex="-1" aria-disabled="true">
+          <div class="dash-card-top">
+            <span class="dash-card-icon"><i class="bi bi-airplane" aria-hidden="true"></i></span>
+            <div class="flex-grow-1">
+              <div class="dash-card-title">Авиабилеты</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Внутренний туризм -->
+      <div class="col-12 col-md-6 col-xl-4">
+        <a class="dash-card" href="{{ url_for('internal.tours_list') }}">
+          <div class="dash-card-top">
+            <span class="dash-card-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
+            <div class="flex-grow-1">
+              <div class="dash-card-title">Внутренний туризм</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Внешний туризм -->
+      <div class="col-12 col-md-6 col-xl-4">
+        <a class="dash-card disabled" href="#" tabindex="-1" aria-disabled="true">
+          <div class="dash-card-top">
+            <span class="dash-card-icon"><i class="bi bi-globe2" aria-hidden="true"></i></span>
+            <div class="flex-grow-1">
+              <div class="dash-card-title">Внешний туризм</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Футер -->
+    <div class="text-center small text-secondary mt-5">
+      {{ config.get('APP_NAME', 'TourismSandbox') }}
+      • {{ config.get('APP_BUILD', 'v1.27 от 07.10.2025 13:57 • VSM') }}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

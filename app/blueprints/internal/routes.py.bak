@@ -1,0 +1,75 @@
+﻿from flask import render_template, redirect, url_for, flash, request, current_app, request
+from flask_login import login_required
+from app.extensions import db
+from app.models import InternalTour
+from app.forms.internal_tour import InternalTourForm
+from . import bp
+
+@bp.route("/tours")
+@login_required
+def tours_list():
+    items = InternalTour.query.order_by(InternalTour.id.desc()).all()
+    return render_template("internal/tours_list.html", items=items)
+
+@bp.route("/tours/new", methods=["GET", "POST"])
+@login_required
+def tour_create():
+    form = InternalTourForm()
+    if form.validate_on_submit():
+        obj = InternalTour(
+            order_date=form.order_date.data,
+            kind=form.kind.data,
+            fio=form.fio.data,
+            start_date=form.start_date.data,
+            end_date=form.end_date.data,
+            direction=form.direction.data,
+            supplier_id=form._supplier_obj.id,
+            client_id=form._client_obj.id,
+            cost=form.cost.data or 0,
+            price=form.price.data or 0,
+            note=form.note.data,
+        )
+        
+        try:
+            obj.recompute()
+        except AttributeError:
+            c = float(obj.cost or 0)
+            p = float(obj.price or 0)
+            obj.net = round(p - c, 2)
+            obj.margin = round((obj.net / p) * 100, 1) if p else 0
+try:
+            try:
+                obj.recompute()
+except AttributeError:
+    c = float(obj.cost or 0)
+    p = float(obj.price or 0)
+    obj.net = round(p - c, 2)
+    obj.margin = round((obj.net / p) * 100, 1) if p else 0
+except AttributeError:
+            c = float(obj.cost or 0)
+            p = float(obj.price or 0)
+            obj.net = round(p - c, 2)
+            obj.margin = round((obj.net / p) * 100, 1) if p else 0
+        db.session.add(obj)
+        db.session.commit()
+        flash("Создано", "success")
+        return redirect(url_for("internal.tours_list"))
+    if request.method == "POST" and form.errors:
+        for fld, errs in form.errors.items():
+            for e in errs:
+                flash(f"{getattr(form, fld).label.text}: {e}", "danger")
+        current_app.logger.error("internal.tour_create errors: %s", dict(form.errors))
+    return render_template("internal/tour_form.html", form=form)
+
+
+
+
+
+
+
+
+
+
+
+
+

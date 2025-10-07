@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card card shadow-sm border-0">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <img class="auth-logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="Логотип" />
+        <h1 class="auth-title">Вход в систему</h1>
+        <div class="text-muted small">Введите логин и пароль, чтобы продолжить</div>
+      </div>
+
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          {{ form.username.label(class_='form-label fw-semibold') }}
+          {{ form.username(class_='form-control form-control-lg', placeholder='Логин') }}
+          {% for e in form.username.errors %}
+            <div class="text-danger small mt-1">{{ e }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          {{ form.password.label(class_='form-label fw-semibold') }}
+          {{ form.password(class_='form-control form-control-lg', placeholder='Пароль') }}
+          {% for e in form.password.errors %}
+            <div class="text-danger small mt-1">{{ e }}</div>
+          {% endfor %}
+        </div>
+
+        {# Если в форме есть remember = BooleanField #}
+        {% if form.remember is defined %}
+        <div class="form-check mb-3">
+          {{ form.remember(class_='form-check-input', id='remember') }}
+          <label class="form-check-label" for="remember">Запомнить меня</label>
+        </div>
+        {% endif %}
+
+        <div class="d-grid">
+          {{ form.submit(class_='btn btn-primary btn-lg') }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

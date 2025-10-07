@@ -1,0 +1,225 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Внутренний туризм — Новый заказ{% endblock %}
+
+{% block content %}
+<div class="container-xxl my-4">
+  <h3 class="mb-3">Внутренний туризм — новый заказ</h3>
+
+  {# Flash-сообщения #}
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <div class="mb-3">
+        {% for cat, msg in msgs %}
+          <div class="alert alert-{{ 'danger' if cat=='error' else cat }} mb-2">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" novalidate>
+    {{ form.csrf_token }}
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        {{ form.order_date.label(class_="form-label") }}
+        {{ form.order_date(class_="form-control", type="date") }}
+        {% if form.order_date.errors %}
+          <div class="text-danger small mt-1">{{ form.order_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.kind.label(class_="form-label") }}
+        {{ form.kind(class_="form-select") }}
+        {% if form.kind.errors %}
+          <div class="text-danger small mt-1">{{ form.kind.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.fio.label(class_="form-label") }}
+        {{ form.fio(class_="form-control", placeholder="ФИО клиента") }}
+        {% if form.fio.errors %}
+          <div class="text-danger small mt-1">{{ form.fio.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.start_date.label(class_="form-label") }}
+        {{ form.start_date(class_="form-control", type="date") }}
+        {% if form.start_date.errors %}
+          <div class="text-danger small mt-1">{{ form.start_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.end_date.label(class_="form-label") }}
+        {{ form.end_date(class_="form-control", type="date") }}
+        {% if form.end_date.errors %}
+          <div class="text-danger small mt-1">{{ form.end_date.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.direction.label(class_="form-label") }}
+        {{ form.direction(class_="form-control", placeholder="Направление") }}
+        {% if form.direction.errors %}
+          <div class="text-danger small mt-1">{{ form.direction.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.supplier_code.label(class_="form-label") }}
+        {{ form.supplier_code(
+             class_="form-control",
+             placeholder="код поставщика",
+             inputmode="numeric",
+             pattern="\\d{5}",
+             maxlength="10",
+             autocomplete="off"
+           ) }}
+        <div class="form-text">Код из справочника (тип = Поставщик). Формат: 5 цифр.</div>
+        {% if form.supplier_code.errors %}
+          <div class="text-danger small mt-1">{{ form.supplier_code.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        {{ form.client_code.label(class_="form-label") }}
+        {{ form.client_code(
+             class_="form-control",
+             placeholder="код клиента",
+             inputmode="numeric",
+             pattern="\\d{5}",
+             maxlength="10",
+             autocomplete="off",
+             id="client_code"
+           ) }}
+        <div class="form-text">Код из справочника (тип = Клиент). Формат: 5 цифр.</div>
+        {% if form.client_code.errors %}
+          <div class="text-danger small mt-1">{{ form.client_code.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      {# Поле только для отображения имени клиента по коду (необязательно, если нет в форме) #}
+      <div class="col-md-6">
+        <label class="form-label">Наименование клиента</label>
+        <input id="client_name" name="client_name" class="form-control" readonly>
+      </div>
+
+      <div class="col-md-2">
+        {{ form.cost.label(class_="form-label") }}
+        {{ form.cost(class_="form-control", step="0.01", inputmode="decimal", placeholder="0.00") }}
+        {% if form.cost.errors %}
+          <div class="text-danger small mt-1">{{ form.cost.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.price.label(class_="form-label") }}
+        {{ form.price(class_="form-control", step="0.01", inputmode="decimal", placeholder="0.00") }}
+        {% if form.price.errors %}
+          <div class="text-danger small mt-1">{{ form.price.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.net.label(class_="form-label") }}
+        {{ form.net(class_="form-control", readonly=True) }}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.margin.label(class_="form-label") }}
+        {{ form.margin(class_="form-control", readonly=True) }}
+      </div>
+
+      <div class="col-12">
+        {{ form.note.label(class_="form-label") }}
+        {{ form.note(class_="form-control", rows=3) }}
+        {% if form.note.errors %}
+          <div class="text-danger small mt-1">{{ form.note.errors[0] }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      {% if form.submit %}
+        {{ form.submit(class_="btn btn-primary") }}
+      {% else %}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+      {% endif %}
+      <a class="btn btn-outline-secondary" href="{{ url_for('internal.tours_list') }}">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const sel = (q) => document.querySelector(q);
+
+  function toNum(v) {
+    if (v == null) return 0;
+    return parseFloat(String(v).replace(/\s+/g,'').replace(',', '.')) || 0;
+  }
+  function setVal(input, val, digits=2, suffix='') {
+    if (!input) return;
+    const n = (Math.round(val * Math.pow(10, digits)) / Math.pow(10, digits)).toFixed(digits);
+    input.value = suffix ? (n + suffix) : n;
+  }
+
+  const cost  = sel('[name="cost"]');
+  const price = sel('[name="price"]');
+  const net   = sel('[name="net"]');
+  const mrg   = sel('[name="margin"]');
+
+  function recalc() {
+    const c = toNum(cost && cost.value);
+    const p = toNum(price && price.value);
+    const n = p - c;
+    const m = p > 0 ? (n * 100 / p) : 0;
+    setVal(net, n, 2);
+    setVal(mrg, m, 1);
+  }
+
+  if (cost)  cost.addEventListener('input', recalc);
+  if (price) price.addEventListener('input', recalc);
+  recalc();
+})();
+</script>
+
+<script>
+(function () {
+  const codeInp = document.querySelector('#client_code, [name="client_code"]');
+  const nameInp = document.querySelector('#client_name, [name="client_name"]');
+  if (!codeInp || !nameInp) return;
+
+  async function fetchName() {
+    const code = (codeInp.value || '').trim();
+    if (!code) { nameInp.value = ''; return; }
+
+    // Строим URL на стороне сервера и подставляем код на стороне клиента
+    const url = "{{ url_for('banks.ajax_ref_code', code='__CODE__') }}".replace('__CODE__', encodeURIComponent(code));
+    try {
+      const resp = await fetch(url, { headers: { 'X-Requested-With': 'fetch' } });
+      if (resp.ok) {
+        const data = await resp.json();
+        nameInp.value = (data && data.name) ? data.name : '';
+      } else {
+        nameInp.value = '';
+      }
+    } catch (e) {
+      nameInp.value = '';
+    }
+  }
+
+  codeInp.addEventListener('change', fetchName);
+  codeInp.addEventListener('blur', fetchName);
+  codeInp.addEventListener('keyup', (e) => { if (e.key === 'Enter') fetchName(); });
+
+  if (codeInp.value) fetchName();
+})();
+</script>
+{% endblock %}

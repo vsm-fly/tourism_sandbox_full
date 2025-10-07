@@ -1,0 +1,42 @@
+﻿{% extends "base.html" %}
+{% block title %}Добавить счёт{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Добавить счёт</h4>
+    <a href="{{ url_for('banks.accounts_list') }}" class="btn btn-outline-secondary">Назад к списку</a>
+  </div>
+
+  <form method="post" class="needs-validation" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.bank_name.label(class="form-label") }}
+      {{ form.bank_name(class="form-select") }}
+      {% if form.bank_name.errors %}<div class="invalid-feedback d-block">{{ form.bank_name.errors[0] }}</div>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.number.label(class="form-label") }}
+      {{ form.number(class="form-control", placeholder="2020 0000 0000 0000 0001") }}
+      {% if form.number.errors %}<div class="invalid-feedback d-block">{{ form.number.errors[0] }}</div>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.currency.label(class="form-label") }}
+      {{ form.currency(class="form-select") }}
+      {% if form.currency.errors %}<div class="invalid-feedback d-block">{{ form.currency.errors[0] }}</div>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.opening_balance.label(class="form-label") }}
+      {{ form.opening_balance(class="form-control", placeholder="0.00") }}
+      <div class="form-text">Можно оставить пустым.</div>
+      {% if form.opening_balance.errors %}<div class="invalid-feedback d-block">{{ form.opening_balance.errors[0] }}</div>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a href="{{ url_for('banks.accounts_list') }}" class="btn btn-secondary ms-2">Отмена</a>
+  </form>
+</div>
+{% endblock %}

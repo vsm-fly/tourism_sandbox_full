@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Ошибка безопасности (CSRF){% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="alert alert-danger" role="alert">
+    <h5 class="alert-heading mb-2">Запрос отклонён (CSRF)</h5>
+    <p class="mb-2">{{ reason or "Неверный или отсутствует CSRF-токен." }}</p>
+    <hr>
+    <p class="mb-0">
+      Обновите страницу и попробуйте ещё раз. Если проблема сохраняется — выйдите из аккаунта и войдите снова.
+    </p>
+  </div>
+  <a class="btn btn-secondary" href="{{ request.referrer or url_for('core.dashboard') }}">Назад</a>
+</div>
+{% endblock %}

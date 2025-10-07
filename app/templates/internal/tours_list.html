@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Внутренние туры{% endblock %}
+
+{% block content %}
+<div class="container-xxl my-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Внутренние туры</h1>
+    {% if is_admin %}
+      <a href="{{ url_for('internal.new_tour') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Новый тур
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Фильтры -->
+  <form method="get" class="mb-3 row g-2 align-items-end">
+    <input type="hidden" name="page" value="1">
+
+    <div class="col-6 col-md-2">
+      <label for="date_from" class="form-label">Дата с</label>
+      <input type="date" id="date_from" name="date_from"
+             value="{{ request.args.get('date_from','') }}" class="form-control">
+    </div>
+
+    <div class="col-6 col-md-2">
+      <label for="date_to" class="form-label">Дата по</label>
+      <input type="date" id="date_to" name="date_to"
+             value="{{ request.args.get('date_to','') }}" class="form-control">
+    </div>
+
+    <div class="col-12 col-md-2">
+      <label for="kind" class="form-label">Вид</label>
+      <select id="kind" name="kind" class="form-select">
+        <option value="">Все</option>
+        {% for k, v in kinds %}
+          <option value="{{ k }}" {% if request.args.get('kind') == k %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-3">
+      <label for="q" class="form-label">Поиск</label>
+      <input id="q" class="form-control" name="q"
+             value="{{ request.args.get('q','') }}"
+             placeholder="ФИО, код, направление...">
+    </div>
+
+    <div class="col-6 col-md-1">
+      <button class="btn btn-outline-secondary w-100" type="submit">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <a class="btn btn-outline-dark w-100"
+         href="{{ url_for('internal.tours_list') }}">
+        Сбросить
+      </a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>№</th>
+          <th>ВИД</th>
+          <th>ФИО</th>
+          <th>Дата начала заказа</th>
+          <th>Дата окончания заказа</th>
+          <th>Направление</th>
+          <th>Поставщик код</th>
+          <th>Наименование поставщика</th>
+          <th>Код клиент</th>
+          <th>Наименование клиента</th>
+          <th>Себестоимость</th>
+          <th>Цена продажи</th>
+          <th>Нетто заработок</th>
+          <th>Маржа</th>
+          <th>Примечание</th>
+          {% if is_admin %}
+            <th class="text-nowrap">Действия</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tours.items %}
+        {% set kind = t.kind_label if t.kind_label is defined else (t.kind or t.order_type or '-') %}
+        {% set date_start = t.start_date if t.start_date is not none else t.date_start %}
+        {% set date_end   = t.end_date   if t.end_date   is not none else t.date_end %}
+        {% set supplier_code = (t.supplier_code_display if t.supplier_code_display is defined and t.supplier_code_display
+                                else (t.supplier_code if t.supplier_code is not none else (t.supplier.code if t.supplier else ''))) %}
+        {% set supplier_name = (t.supplier_name if t.supplier_name is defined and t.supplier_name
+                                else (t.supplier.name if t.supplier else '')) %}
+        {% set client_code = (t.client_code_display if t.client_code_display is defined and t.client_code_display
+                               else (t.client_code if t.client_code is not none else (t.client.code if t.client else ''))) %}
+        {% set client_name = (t.client_name if t.client_name is defined and t.client_name
+                               else (t.client.name if t.client else '')) %}
+        {% set cost = t.cost or 0 %}
+        {% set price = (t.price if t.price is not none else (t.sale_price or 0)) %}
+        {% set net = price - cost %}
+        {% set pct = (net / price * 100) if price > 0 else 0 %}
+
+        <tr>
+          <td class="text-muted">{{ loop.index + (tours.page-1)*tours.per_page }}</td>
+          <td>{{ kind or '-' }}</td>
+          <td>{{ t.fio or '—' }}</td>
+          <td>{{ date_start.strftime('%d.%m.%Y') if date_start else '—' }}</td>
+          <td>{{ date_end.strftime('%d.%m.%Y') if date_end else '—' }}</td>
+          <td>{{ t.direction or '—' }}</td>
+          <td>{{ supplier_code or '—' }}</td>
+          <td>{{ supplier_name or '—' }}</td>
+          <td>{{ client_code or '—' }}</td>
+          <td>{{ client_name or '—' }}</td>
+          <td>{{ '{:,.2f}'.format(cost).replace(',', ' ').replace('.', ',') }}</td>
+          <td>{{ '{:,.2f}'.format(price).replace(',', ' ').replace('.', ',') }}</td>
+          <td>{{ '{:,.2f}'.format(net).replace(',', ' ').replace('.', ',') }}</td>
+          <td>{{ '{:.1f}%'.format(pct) }}</td>
+          <td class="text-break">{{ t.note or '—' }}</td>
+
+          {% if is_admin %}
+          <td class="text-nowrap">
+            <a class="btn btn-sm btn-outline-primary"
+               href="{{ url_for('internal.edit_tour', tour_id=t.id) }}"
+               title="Редактировать">
+              <i class="bi bi-pencil"></i>
+            </a>
+
+            <form action="{{ url_for('internal.delete_tour', tour_id=t.id) }}"
+                  method="post" class="d-inline"
+                  onsubmit="return confirm('Удалить тур №{{ t.id }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{{ 16 if is_admin else 15 }}" class="text-center text-muted py-4">Записей не найдено</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% set args = {
+      'q': request.args.get('q'),
+      'kind': request.args.get('kind'),
+      'date_from': request.args.get('date_from'),
+      'date_to': request.args.get('date_to')
+  } %}
+  <nav class="d-flex justify-content-end">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item {% if not tours.has_prev %}disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('internal.tours_list', page=tours.prev_num, **args) }}">«</a>
+      </li>
+      {% for p in range(1, tours.pages + 1) %}
+      <li class="page-item {% if p == tours.page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('internal.tours_list', page=p, **args) }}">{{ p }}</a>
+      </li>
+      {% endfor %}
+      <li class="page-item {% if not tours.has_next %}disabled{% endif %}">
+        <a class="page-link" href="{{ url_for('internal.tours_list', page=tours.next_num, **args) }}">»</a>
+      </li>
+    </ul>
+  </nav>
+
+</div>
+{% endblock %}
